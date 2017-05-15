@@ -1,26 +1,42 @@
-local function run(msg, patterns)
-   local response_body = {}
-   local request_constructor = {
-      url = patterns[1],
-      method = "HEAD",
-      sink = ltn12.sink.table(response_body),
-      headers = {},
-      redirect = false
-   }
+function run(msg,matches)
 
-   local ok, response_code, response_headers, response_status_line = http.request(request_constructor)
-   if ok and response_headers.location then
-      return " 👍 " .. response_headers.location
+ if matches[1] == 'msgs' and msg.reply_to_message_id_ == 0  then
+ if is_sudo(msg) then
+  rank = ' Bot Owner '
+ elseif is_owner(msg) then
+  rank = ' Group Owner '
+ elseif is_admin(msg) then
+  rank = ' Bot Admin '
+ elseif is_mod(msg) then
+  rank = ' Moderator '
+ else
+  rank = 'Member '
+ end
+local function getpro(arg, data)
+
+   if data.photos_[0] then
+            tdcli.sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, data.photos_[0].sizes_[1].photo_.persistent_id_,'\n🔼 Your Photo 🔼\n\n💬 Your messages : '..user_info_msgs..'\n',msg.id_,msg.id_)
    else
-      return "Can't expand the url."
+      tdcli.sendMassage(msg.chat_id_, msg.id_, 1, "❌ _No Profile Photo !_ ❌\n\n*💬 Your messages :* `'..user_info_msgs..'`", 1, 'md')
    end
+   end
+   tdcli_function ({
+    ID = "GetUserProfilePhotos",
+    user_id_ = msg.sender_user_id_,
+    offset_ = 0,
+    limit_ = 1
+  }, getpro, nil)
+	end
+	
 end
 
 return {
-   description = "Expand a shortened URL to the original one.",
-   usage = "!expand [url]: Return the original URL",
-   patterns = {
-      "^!expand (https?://[%w-_%.%?%.:/%+=&]+)$"
-   },
-   run = run
+patterns = {
+"^[/!#]([Mm][sgs])$",
+
+},
+run = run
 }
+
+
+
